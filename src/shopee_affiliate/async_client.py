@@ -217,6 +217,9 @@ class AsyncShopeeAffiliateClient:
         **kwargs: Any,
     ) -> AsyncIterator[ConversionReport]:
         """Automatically page through conversion reports asynchronously using scrollId."""
+        if max_results is not None and max_results <= 0:
+            return
+
         current_scroll_id: str | None = None
         count = 0
 

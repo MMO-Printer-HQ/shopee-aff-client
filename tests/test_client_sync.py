@@ -154,6 +154,9 @@ def mock_transport_handler(request: httpx.Request) -> httpx.Response:
     if "http500" in query:
         return httpx.Response(500, json={"message": "Internal Server Error"})
 
+    if "http502_html" in query:
+        return httpx.Response(502, text="<html><body>502 Bad Gateway</body></html>")
+
     return httpx.Response(400, json={"message": "Not Found"})
 
 
@@ -232,9 +235,13 @@ def test_sync_get_conversion_report():
 
 
 def test_sync_iter_conversion_reports():
+    calls = []
+
     def paging_transport_handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content.decode("utf-8"))
-        scroll_id = body.get("variables", {}).get("scrollId")
+        variables = body.get("variables", {})
+        calls.append(variables)
+        scroll_id = variables.get("scrollId")
         if scroll_id is None:
             return httpx.Response(
                 200,
@@ -254,7 +261,7 @@ def test_sync_iter_conversion_reports():
                     "data": {
                         "conversionReport": {
                             "nodes": [{"conversionId": 102, "totalCommission": "200"}],
-                            "pageInfo": {"limit": 1, "hasNextPage": False, "scrollId": ""},
+                            "pageInfo": {"limit": 1, "hasNextPage": False, "scrollId": "token_page3"},
                         }
                     }
                 },
@@ -263,17 +270,31 @@ def test_sync_iter_conversion_reports():
 
     mock_transport = httpx.MockTransport(paging_transport_handler)
     with ShopeeAffiliateClient(app_id="app1", secret="sec1", transport=mock_transport) as client:
-        items = list(client.iter_conversion_reports(limit_per_page=1))
+        items = list(client.iter_conversion_reports(limit_per_page=1, order_status="COMPLETED"))
         assert len(items) == 2
         assert items[0].conversion_id == 101
         assert items[1].conversion_id == 102
+        assert calls[0].get("orderStatus") == "COMPLETED"
+        assert calls[1].get("orderStatus") == "COMPLETED"
+        assert len(calls) == 2
 
     # Test max_results capping
+    calls.clear()
     mock_transport = httpx.MockTransport(paging_transport_handler)
     with ShopeeAffiliateClient(app_id="app1", secret="sec1", transport=mock_transport) as client:
         items = list(client.iter_conversion_reports(limit_per_page=1, max_results=1))
         assert len(items) == 1
         assert items[0].conversion_id == 101
+        assert len(calls) == 1
+
+    # Test max_results <= 0 returns immediately without making API calls
+    calls.clear()
+    with ShopeeAffiliateClient(app_id="app1", secret="sec1", transport=mock_transport) as client:
+        items_zero = list(client.iter_conversion_reports(limit_per_page=1, max_results=0))
+        assert len(items_zero) == 0
+        items_neg = list(client.iter_conversion_reports(limit_per_page=1, max_results=-5))
+        assert len(items_neg) == 0
+        assert len(calls) == 0
 
 
 def test_sync_error_handling():
@@ -286,6 +307,10 @@ def test_sync_error_handling():
         with pytest.raises(ShopeeHTTPError) as exc_info_http:
             client.execute("query http500 { dummy }")
         assert exc_info_http.value.status_code == 500
+
+        with pytest.raises(ShopeeHTTPError) as exc_info_http_html:
+            client.execute("query http502_html { dummy }")
+        assert exc_info_http_html.value.status_code == 502
 
 
 def test_sync_context_manager():

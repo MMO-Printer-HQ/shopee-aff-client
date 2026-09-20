@@ -253,6 +253,15 @@ async def test_async_iter_conversion_reports():
         assert items[0].conversion_id == 201
         assert len(calls) == 1
 
+    # Test max_results <= 0 returns immediately without making API calls
+    calls.clear()
+    async with AsyncShopeeAffiliateClient(app_id="app1", secret="sec1", transport=mock_transport) as client:
+        items_zero = [r async for r in client.iter_conversion_reports(limit_per_page=1, max_results=0)]
+        assert len(items_zero) == 0
+        items_neg = [r async for r in client.iter_conversion_reports(limit_per_page=1, max_results=-5)]
+        assert len(items_neg) == 0
+        assert len(calls) == 0
+
 
 @pytest.mark.asyncio
 async def test_async_error_handling():

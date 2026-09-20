@@ -64,7 +64,11 @@ class ShopeeAffiliateClient:
             content=payload,
             headers={"Authorization": auth_header},
         )
-        return process_graphql_response(response.status_code, response.json())
+        try:
+            body = response.json()
+        except Exception:
+            body = {"message": response.text, "raw": response.text}
+        return process_graphql_response(response.status_code, body)
 
     def generate_short_link(
         self,
@@ -210,8 +214,12 @@ class ShopeeAffiliateClient:
         purchase_time_end: int | None = None,
         limit_per_page: int = 50,
         max_results: int | None = None,
+        **kwargs: Any,
     ) -> Iterator[ConversionReport]:
         """Automatically page through conversion reports using scrollId."""
+        if max_results is not None and max_results <= 0:
+            return
+
         current_scroll_id: str | None = None
         count = 0
 
@@ -221,6 +229,7 @@ class ShopeeAffiliateClient:
                 purchase_time_end=purchase_time_end,
                 limit=limit_per_page,
                 scroll_id=current_scroll_id,
+                **kwargs,
             )
             if not reports:
                 break
@@ -231,6 +240,6 @@ class ShopeeAffiliateClient:
                 if max_results is not None and count >= max_results:
                     return
 
-            if not page_info.scroll_id:
+            if not page_info.has_next_page or not page_info.scroll_id:
                 break
             current_scroll_id = page_info.scroll_id

@@ -36,4 +36,5 @@ def test_build_authorization_header_default_timestamp():
 
     header, ts = build_authorization_header(app_id=app_id, secret=secret, payload=payload)
     assert ts > 0
-    assert f"Timestamp={ts}" in header
+    expected_sig = generate_signature(app_id, secret, payload, ts)
+    assert header == f"SHA256 Credential={app_id}, Timestamp={ts}, Signature={expected_sig}"

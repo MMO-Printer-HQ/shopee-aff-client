@@ -48,6 +48,34 @@ def test_process_graphql_response_error_without_code():
     assert "Syntax error" in str(exc_info.value)
 
 
+def test_process_graphql_response_non_dict_error():
+    data = {
+        "errors": ["Internal Server Error"],
+    }
+    with pytest.raises(ShopeeAPIError) as exc_info:
+        process_graphql_response(200, data)
+    assert "Internal Server Error" in str(exc_info.value)
+    assert exc_info.value.raw_response == data
+
+
+def test_process_graphql_response_string_code():
+    data = {
+        "errors": [{"message": "Invalid credential", "code": "10020"}],
+    }
+    with pytest.raises(ShopeeAuthError) as exc_info:
+        process_graphql_response(200, data)
+    assert exc_info.value.error_code == 10020
+
+
+def test_process_graphql_response_unparseable_code():
+    data = {
+        "errors": [{"message": "Bad request", "code": "NOT_AN_INT"}],
+    }
+    with pytest.raises(ShopeeAPIError) as exc_info:
+        process_graphql_response(200, data)
+    assert "Bad request" in str(exc_info.value)
+
+
 def test_process_graphql_response_top_level_code():
     data = {
         "code": 10020,

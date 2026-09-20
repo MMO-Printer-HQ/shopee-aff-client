@@ -13,9 +13,13 @@ class PageInfo:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        raw_page = data.get("page")
+        page = int(raw_page) if raw_page is not None and raw_page != "" else None
+        raw_limit = data.get("limit")
+        limit = int(raw_limit) if raw_limit is not None and raw_limit != "" else None
         return cls(
-            page=data.get("page"),
-            limit=data.get("limit"),
+            page=page,
+            limit=limit,
             has_next_page=data.get("hasNextPage"),
             scroll_id=data.get("scrollId"),
         )
@@ -35,7 +39,7 @@ class ShortLinkResult:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
-        return cls(short_link=data.get("shortLink", ""))
+        return cls(short_link=str(data.get("shortLink") or ""))
 
     def to_dict(self) -> dict[str, Any]:
         return {"shortLink": self.short_link}
@@ -67,27 +71,36 @@ class ProductOffer:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        raw_shop_id = data.get("shopId")
+        shop_id = int(raw_shop_id) if raw_shop_id is not None and raw_shop_id != "" else None
+
+        raw_start_time = data.get("periodStartTime")
+        start_time = int(raw_start_time) if raw_start_time is not None and raw_start_time != "" else None
+
+        raw_end_time = data.get("periodEndTime")
+        end_time = int(raw_end_time) if raw_end_time is not None and raw_end_time != "" else None
+
         return cls(
-            item_id=int(data.get("itemId", 0)),
-            product_name=data.get("productName", ""),
-            product_link=data.get("productLink", ""),
-            offer_link=data.get("offerLink", ""),
-            image_url=data.get("imageUrl", ""),
-            commission_rate=str(data.get("commissionRate", "0")),
-            seller_commission_rate=str(data.get("sellerCommissionRate", "0")),
-            shopee_commission_rate=str(data.get("shopeeCommissionRate", "0")),
-            commission=str(data.get("commission", "0")),
-            price_min=str(data.get("priceMin", "0")),
-            price_max=str(data.get("priceMax", "0")),
-            sales=int(data.get("sales", 0)),
-            rating_star=str(data.get("ratingStar", "0")),
-            price_discount_rate=int(data.get("priceDiscountRate", 0)),
-            shop_id=int(data["shopId"]) if data.get("shopId") is not None else None,
-            shop_name=data.get("shopName", ""),
+            item_id=int(data.get("itemId") or 0),
+            product_name=str(data.get("productName") or ""),
+            product_link=str(data.get("productLink") or ""),
+            offer_link=str(data.get("offerLink") or ""),
+            image_url=str(data.get("imageUrl") or ""),
+            commission_rate=str(data.get("commissionRate") or "0"),
+            seller_commission_rate=str(data.get("sellerCommissionRate") or "0"),
+            shopee_commission_rate=str(data.get("shopeeCommissionRate") or "0"),
+            commission=str(data.get("commission") or "0"),
+            price_min=str(data.get("priceMin") or "0"),
+            price_max=str(data.get("priceMax") or "0"),
+            sales=int(data.get("sales") or 0),
+            rating_star=str(data.get("ratingStar") or "0"),
+            price_discount_rate=int(data.get("priceDiscountRate") or 0),
+            shop_id=shop_id,
+            shop_name=str(data.get("shopName") or ""),
             shop_type=data.get("shopType") or [],
             product_cat_ids=data.get("productCatIds") or [],
-            period_start_time=data.get("periodStartTime"),
-            period_end_time=data.get("periodEndTime"),
+            period_start_time=start_time,
+            period_end_time=end_time,
             raw=data,
         )
 
@@ -133,18 +146,24 @@ class ShopOffer:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        raw_start_time = data.get("periodStartTime")
+        start_time = int(raw_start_time) if raw_start_time is not None and raw_start_time != "" else None
+
+        raw_end_time = data.get("periodEndTime")
+        end_time = int(raw_end_time) if raw_end_time is not None and raw_end_time != "" else None
+
         return cls(
-            shop_id=int(data.get("shopId", 0)),
-            shop_name=data.get("shopName", ""),
-            offer_link=data.get("offerLink", ""),
-            original_link=data.get("originalLink", ""),
-            commission_rate=str(data.get("commissionRate", "0")),
-            seller_comm_cove_ratio=str(data.get("sellerCommCoveRatio", "0")),
-            rating_star=str(data.get("ratingStar", "0")),
-            image_url=data.get("imageUrl", ""),
+            shop_id=int(data.get("shopId") or 0),
+            shop_name=str(data.get("shopName") or ""),
+            offer_link=str(data.get("offerLink") or ""),
+            original_link=str(data.get("originalLink") or ""),
+            commission_rate=str(data.get("commissionRate") or "0"),
+            seller_comm_cove_ratio=str(data.get("sellerCommCoveRatio") or "0"),
+            rating_star=str(data.get("ratingStar") or "0"),
+            image_url=str(data.get("imageUrl") or ""),
             shop_type=data.get("shopType") or [],
-            period_start_time=data.get("periodStartTime"),
-            period_end_time=data.get("periodEndTime"),
+            period_start_time=start_time,
+            period_end_time=end_time,
             raw=data,
         )
 
@@ -185,22 +204,28 @@ class ConversionReportItem:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        raw_shop_id = data.get("shopId")
+        shop_id = int(raw_shop_id) if raw_shop_id is not None and raw_shop_id != "" else None
+
+        raw_complete_time = data.get("completeTime")
+        complete_time = int(raw_complete_time) if raw_complete_time is not None and raw_complete_time != "" else None
+
         return cls(
-            item_id=int(data.get("itemId", 0)),
-            item_name=data.get("itemName", ""),
-            item_price=str(data.get("itemPrice", "0")),
-            qty=int(data.get("qty", 0)),
-            actual_amount=str(data.get("actualAmount", "0")),
-            item_total_commission=str(data.get("itemTotalCommission", "0")),
-            item_seller_commission=str(data.get("itemSellerCommission", "0")),
-            item_shopee_commission_capped=str(data.get("itemShopeeCommissionCapped", "0")),
-            display_item_status=data.get("displayItemStatus", ""),
-            order_id=str(data.get("orderId", "")),
-            shop_id=int(data["shopId"]) if data.get("shopId") is not None else None,
-            shop_name=data.get("shopName", ""),
-            complete_time=data.get("completeTime"),
-            image_url=data.get("imageUrl", ""),
-            fraud_status=data.get("fraudStatus", ""),
+            item_id=int(data.get("itemId") or 0),
+            item_name=str(data.get("itemName") or ""),
+            item_price=str(data.get("itemPrice") or "0"),
+            qty=int(data.get("qty") or 0),
+            actual_amount=str(data.get("actualAmount") or "0"),
+            item_total_commission=str(data.get("itemTotalCommission") or "0"),
+            item_seller_commission=str(data.get("itemSellerCommission") or "0"),
+            item_shopee_commission_capped=str(data.get("itemShopeeCommissionCapped") or "0"),
+            display_item_status=str(data.get("displayItemStatus") or ""),
+            order_id=str(data.get("orderId") or ""),
+            shop_id=shop_id,
+            shop_name=str(data.get("shopName") or ""),
+            complete_time=complete_time,
+            image_url=str(data.get("imageUrl") or ""),
+            fraud_status=str(data.get("fraudStatus") or ""),
             raw=data,
         )
 
@@ -235,10 +260,10 @@ class ConversionReportOrder:
     def from_dict(cls, data: dict[str, Any]) -> Self:
         raw_items = data.get("items") or []
         return cls(
-            order_id=str(data.get("orderId", "")),
-            order_status=data.get("orderStatus", ""),
-            shop_type=data.get("shopType", ""),
-            items=[ConversionReportItem.from_dict(item) for item in raw_items],
+            order_id=str(data.get("orderId") or ""),
+            order_status=str(data.get("orderStatus") or ""),
+            shop_type=str(data.get("shopType") or ""),
+            items=[ConversionReportItem.from_dict(item) for item in raw_items if isinstance(item, dict)],
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -269,17 +294,17 @@ class ConversionReport:
     def from_dict(cls, data: dict[str, Any]) -> Self:
         raw_orders = data.get("orders") or []
         return cls(
-            conversion_id=int(data.get("conversionId", 0)),
-            purchase_time=int(data.get("purchaseTime", 0)),
-            click_time=int(data.get("clickTime", 0)),
-            total_commission=str(data.get("totalCommission", "0")),
-            seller_commission=str(data.get("sellerCommission", "0")),
-            shopee_commission_capped=str(data.get("shopeeCommissionCapped", "0")),
-            net_commission=str(data.get("netCommission", "")),
-            buyer_type=data.get("buyerType", ""),
-            utm_content=data.get("utmContent", ""),
-            device=data.get("device", ""),
-            orders=[ConversionReportOrder.from_dict(order) for order in raw_orders],
+            conversion_id=int(data.get("conversionId") or 0),
+            purchase_time=int(data.get("purchaseTime") or 0),
+            click_time=int(data.get("clickTime") or 0),
+            total_commission=str(data.get("totalCommission") or "0"),
+            seller_commission=str(data.get("sellerCommission") or "0"),
+            shopee_commission_capped=str(data.get("shopeeCommissionCapped") or "0"),
+            net_commission=str(data.get("netCommission") or ""),
+            buyer_type=str(data.get("buyerType") or ""),
+            utm_content=str(data.get("utmContent") or ""),
+            device=str(data.get("device") or ""),
+            orders=[ConversionReportOrder.from_dict(order) for order in raw_orders if isinstance(order, dict)],
             raw=data,
         )
 

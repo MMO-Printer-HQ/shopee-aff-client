@@ -3,6 +3,7 @@
 - **Date:** 2026-09-20
 - **Status:** Approved
 - **Target Runtime:** Python >= 3.11
+- **Package Manager:** `uv` (standard `pyproject.toml` with `hatchling` build backend)
 - **Package Name:** `shopee-affiliate` (import name: `shopee_affiliate`)
 - **Primary Dependency:** `httpx >= 0.24.0`
 
